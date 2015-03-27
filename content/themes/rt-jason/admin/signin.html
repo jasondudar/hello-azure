@@ -1,0 +1,89 @@
+<r-if condition="this.mode == &quot;signin&quot;">
+  <h1>Signin</h1>
+  <br/>
+  <form>
+    <formgroup>
+      <input value="this.email" placeholder="email" addonlefticon="envelope"/>
+      <input value="this.password" placeholder="password" type="password" addonlefticon="lock"/>
+      <button class="btn btn-info" name="btnSignIn" defaultbutton="1">Sign in</button>
+      <button class="btn btn-link" name="btnForgotPassword">Forgot password</button>
+    </formgroup>
+  </form>
+</r-if>
+<r-if condition="this.mode == &quot;forgot&quot;">
+  <h1>Forgot password</h1>
+  <br/>
+  <form>
+    <formgroup>
+      <input value="this.email" placeholder="email" addonlefticon="envelope"/>
+      <button class="btn btn-info" name="btnSendInstructions" defaultbutton="1">Send Reset Instructions</button>
+      <button class="btn btn-link" name="btnReturn">Return to sign in</button>
+    </formgroup>
+  </form>
+</r-if>
+<r-if condition="this.mode == &quot;forgotsent&quot;">
+  <h1>Forgot password</h1>
+  <br/>
+  <p>Instructions for resetting your password have been sent to your email.</p>
+  <button class="btn btn-info" name="btnReturn">Return to sign in</button>
+</r-if>
+<r-if condition="this.mode == &quot;reset&quot;">
+  <h1>Reset password</h1>
+  <br/>
+  <form>
+    <formgroup>
+      <input value="this.password" placeholder="new password" type="password" addonlefticon="lock"/>
+      <input value="this.passwordRepeat" placeholder="new password again" type="password" addonlefticon="lock"/>
+      <button class="btn btn-info" name="btnUpdatePassword" defaultbutton="1">Update password</button>
+    </formgroup>
+  </form>
+</r-if>
+==
+class Signin extends Template {
+  constructor(){
+    this.email = ""; // remember from localStorage
+    if (this.params.email){
+      this.email = this.params.email;
+    }
+    this.password = "";
+    this.passwordRepeat = "";
+    if (this.params.token){
+      this.mode = "reset";
+    }
+    else {
+      this.mode = "signin";
+    }
+  }
+ 
+  btnSignIn_onclick(){
+    var password = this.password;
+    this.password = "";
+    System.Auth.signin(this.email,password);
+    Page.nav("/admin");
+  }
+
+  btnSendInstructions_onclick(){
+    System.Auth.sendResetToken(this.email);
+    this.mode = "forgotsent";
+    
+  }
+
+  btnForgotPassword_onclick(){
+    this.mode = "forgot";
+  }
+
+  btnReturn_onclick(){
+    this.mode = "signin";
+  }
+
+  btnUpdatePassword_onclick(){
+    if (this.password != this.passwordRepeat){
+      throw("Passwords do not match"); 
+    }
+    System.Auth.resetPassword(this.email,this.params.token,this.password);
+    this.mode = "signin";
+  }
+}
+
+==
+{}
